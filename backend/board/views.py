@@ -13,7 +13,6 @@ def board_list(request):
     boards = Board.objects.all().values()
 
     # Dict 형태로 변환된 게시판 정보를 JSON 형태로 응답합니다.
-    # created_at 필드는 자동으로 Json으로 변환되지 않아 safe=False 옵션을 사용합니다.
     # safe=False는 리스트 형태의 데이터를 JSON으로 변환할 때 필요합니다.
     return JsonResponse(list(boards), safe=False)
 
@@ -23,7 +22,6 @@ def board_create(request):
     """새로운 게시판을 생성하는 View"""
 
     # 게시판을 생성하기 위해서 POST 요청을 사용합니다.
-    # 요청이 POST가 아닐 경우 에러 응답을 반환합니다.
     if request.method == "POST":
         # 요청에서 게시판 제목과 내용을 가져옵니다.
         title = request.POST.get("title")

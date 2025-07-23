@@ -24,7 +24,7 @@ def comment_create(request):
 
     # 댓글을 생성하기 위해서 POST 요청을 사용합니다.
     if request.method == "POST":
-        # 요청에서 댓글 제목과 내용을 가져옵니다.
+        # 요청에서 댓글 내용을 가져옵니다.
         content = request.POST.get("content")
 
         # 새로운 댓글을 생성합니다.
