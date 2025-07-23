@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>게시판 테스트 프론트</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    #board-list, #comment-list { margin-bottom: 2em; }
+    .board-item, .comment-item { border-bottom: 1px solid #ccc; padding: 0.5em 0; }
+    form { margin-bottom: 2em; }
+    input, textarea { display: block; margin-bottom: 1em; width: 300px; }
+  </style>
+</head>
+<body>
+  <h1>게시판 목록</h1>
+  <div id="board-list"></div>
+
+  <h2>새 게시판 생성</h2>
+  <form id="create-board-form">
+    <input type="text" id="title" placeholder="제목" required />
+    <textarea id="content" placeholder="내용" required></textarea>
+    <button type="submit">생성</button>
+  </form>
+
+  <h2>댓글 목록</h2>
+  <div id="comment-list"></div>
+  <h3>댓글 작성</h3>
+  <form id="create-comment-form">
+    <textarea id="comment-content" placeholder="댓글 내용" required></textarea>
+    <button type="submit">댓글 등록</button>
+  </form>
+
+  <script>
+    // 게시판 삭제
+    function deleteBoard(id) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      fetch(`http://127.0.0.1:8000/board-delete/${id}/`, {
+        method: 'DELETE',
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('삭제되었습니다!');
+        fetchBoards();
+      });
+    }
+
+    // 게시판 수정
+    function updateBoard(id, title, content) {
+      const formData = new FormData();
+      const newTitle = prompt('새 제목을 입력하세요', title);
+      if (newTitle === null) return;
+      formData.append('title', newTitle);
+      const newContent = prompt('새 내용을 입력하세요', content);
+      if (newContent === null) return;
+      formData.append('content', newContent);
+      fetch(`http://127.0.0.1:8000/board-update/${id}/`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('수정되었습니다!');
+        fetchBoards();
+      });
+    }
+
+    // 게시판 목록 불러오기
+    function fetchBoards() {
+      fetch('http://127.0.0.1:8000/board-list/')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('board-list');
+        list.innerHTML = '';
+        const table = document.createElement('table');
+        table.style.borderCollapse = 'collapse';
+        table.style.width = '100%';
+        table.innerHTML = `
+        <thead>
+          <tr>
+          <th style="border:1px solid #ccc; padding:8px;">ID</th>
+          <th style="border:1px solid #ccc; padding:8px;">제목</th>
+          <th style="border:1px solid #ccc; padding:8px;">내용</th>
+          <th style="border:1px solid #ccc; padding:8px;">생성일</th>
+          <th style="border:1px solid #ccc; padding:8px;">관리</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+        data.forEach(board => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${board.id}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${board.title}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${board.content}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${new Date(board.created_at).toLocaleString()}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+            <button onclick="deleteBoard(${board.id})">삭제</button>
+            <button onclick="updateBoard(${board.id}, '${board.title.replace(/'/g, "\'")}', '${board.content.replace(/'/g, "\'")}')">수정</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        });
+        list.appendChild(table);
+      });
+    }
+
+    // 댓글 삭제
+    function deleteComment(id) {
+      if (!confirm('댓글을 삭제하시겠습니까?')) return;
+      fetch(`http://127.0.0.1:8000/comment-delete/${id}/`, {
+        method: 'DELETE',
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('댓글이 삭제되었습니다!');
+        fetchComments();
+      });
+    }
+
+    // 댓글 수정
+    function updateComment(id, content) {
+      const formData = new FormData();
+      const newContent = prompt('새 댓글 내용을 입력하세요', content);
+      if (newContent === null) return;
+      formData.append('content', newContent);
+      fetch(`http://127.0.0.1:8000/comment-update/${id}/`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('댓글이 수정되었습니다!');
+        fetchComments();
+      });
+    }
+
+    // 댓글 목록 불러오기
+    function fetchComments() {
+      fetch('http://127.0.0.1:8000/comment-list/')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('comment-list');
+        list.innerHTML = '';
+        const table = document.createElement('table');
+        table.style.borderCollapse = 'collapse';
+        table.style.width = '100%';
+        table.innerHTML = `
+        <thead>
+          <tr>
+          <th style="border:1px solid #ccc; padding:8px;">ID</th>
+          <th style="border:1px solid #ccc; padding:8px;">내용</th>
+          <th style="border:1px solid #ccc; padding:8px;">작성일</th>
+          <th style="border:1px solid #ccc; padding:8px;">관리</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+        data.forEach(comment => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${comment.id}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${comment.content}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">${new Date(comment.created_at).toLocaleString()}</td>
+          <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+            <button onclick="deleteComment(${comment.id})">삭제</button>
+            <button onclick="updateComment(${comment.id}, '${comment.content.replace(/'/g, "\'")}')">수정</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        });
+        list.appendChild(table);
+      });
+    }
+
+    // 게시판 생성
+    document.getElementById('create-board-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+
+      fetch('http://127.0.0.1:8000/board-create/', { // 실제 API URL에 맞게 수정
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('게시판이 생성되었습니다!');
+        fetchBoards();
+        this.reset();
+      });
+    });
+
+    // 댓글 생성
+    document.getElementById('create-comment-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const content = document.getElementById('comment-content').value;
+      const formData = new FormData();
+      formData.append('content', content);
+      fetch('http://127.0.0.1:8000/comment-create/', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('댓글이 등록되었습니다!');
+        fetchComments();
+        this.reset();
+      });
+    });
+
+    // 페이지 로드 시 게시판/댓글 목록 불러오기
+    fetchBoards();
+    fetchComments();
+  </script>
+</body>
+</html>

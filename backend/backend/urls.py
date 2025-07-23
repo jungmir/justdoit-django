@@ -17,7 +17,25 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
+from board.views import board_list, board_create, board_delete, board_update
+from comment.views import comment_list, comment_create, comment_update, comment_delete
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # 외부에서 board_list 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("board-list/", board_list, name="board_list"),
+    # 외부에서 board_create 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("board-create/", board_create, name="board_create"),
+    # 외부에서 board_update 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("board-update/<int:pk>/", board_update, name="board_update"),
+    # 외부에서 board_delete 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("board-delete/<int:pk>/", board_delete, name="board_delete"),
+    # 외부에서 comment_list 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("comment-list/", comment_list, name="comment_list"),
+    # 외부에서 comment_create 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("comment-create/", comment_create, name="comment_create"),
+    # 외부에서 comment_update 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("comment-update/<int:pk>/", comment_update, name="comment_update"),
+    # 외부에서 comment_delete 뷰를 사용할 수 있도록 URL을 추가합니다.
+    path("comment-delete/<int:pk>/", comment_delete, name="comment_delete"),
 ]
