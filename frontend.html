@@ -12,6 +12,9 @@
   </style>
 </head>
 <body>
+  <h1>백엔드 서버 주소</h1>
+  <input type="text" id="server-url" value="http://127.0.0.1:8000"/>
+
   <h1>게시판 목록</h1>
   <div id="board-list"></div>
 
@@ -31,10 +34,21 @@
   </form>
 
   <script>
+    // 서버 URL 설정
+    function getServerUrl() {
+      const serverUrl = document.getElementById('server-url').value;
+      if (!serverUrl) {
+        alert('서버 URL을 입력해주세요.');
+        return null;
+      }
+      return serverUrl.endsWith('/') ? serverUrl : `${serverUrl}/`;
+    }
+
     // 게시판 삭제
     function deleteBoard(id) {
+      const serverUrl = getServerUrl();
       if (!confirm('정말 삭제하시겠습니까?')) return;
-      fetch(`http://127.0.0.1:8000/board-delete/${id}/`, {
+      fetch(`${serverUrl}/board-delete/${id}/`, {
         method: 'DELETE',
       })
       .then(res => res.json())
@@ -46,6 +60,7 @@
 
     // 게시판 수정
     function updateBoard(id, title, content) {
+      const serverUrl = getServerUrl();
       const formData = new FormData();
       const newTitle = prompt('새 제목을 입력하세요', title);
       if (newTitle === null) return;
@@ -53,7 +68,7 @@
       const newContent = prompt('새 내용을 입력하세요', content);
       if (newContent === null) return;
       formData.append('content', newContent);
-      fetch(`http://127.0.0.1:8000/board-update/${id}/`, {
+      fetch(`${serverUrl}/board-update/${id}/`, {
         method: 'POST',
         body: formData
       })
@@ -66,7 +81,8 @@
 
     // 게시판 목록 불러오기
     function fetchBoards() {
-      fetch('http://127.0.0.1:8000/board-list/')
+      const serverUrl = getServerUrl();
+      fetch(`${serverUrl}/board-list/`)
       .then(res => res.json())
       .then(data => {
         const list = document.getElementById('board-list');
@@ -107,8 +123,9 @@
 
     // 댓글 삭제
     function deleteComment(id) {
+      const serverUrl = getServerUrl();
       if (!confirm('댓글을 삭제하시겠습니까?')) return;
-      fetch(`http://127.0.0.1:8000/comment-delete/${id}/`, {
+      fetch(`${serverUrl}/comment-delete/${id}/`, {
         method: 'DELETE',
       })
       .then(res => res.json())
@@ -120,11 +137,12 @@
 
     // 댓글 수정
     function updateComment(id, content) {
+      const serverUrl = getServerUrl();
       const formData = new FormData();
       const newContent = prompt('새 댓글 내용을 입력하세요', content);
       if (newContent === null) return;
       formData.append('content', newContent);
-      fetch(`http://127.0.0.1:8000/comment-update/${id}/`, {
+      fetch(`${serverUrl}/comment-update/${id}/`, {
         method: 'POST',
         body: formData
       })
@@ -137,7 +155,8 @@
 
     // 댓글 목록 불러오기
     function fetchComments() {
-      fetch('http://127.0.0.1:8000/comment-list/')
+      const serverUrl = getServerUrl();
+      fetch(`${serverUrl}/comment-list/`)
       .then(res => res.json())
       .then(data => {
         const list = document.getElementById('comment-list');
@@ -177,13 +196,14 @@
     // 게시판 생성
     document.getElementById('create-board-form').addEventListener('submit', function(e) {
       e.preventDefault();
+      const serverUrl = getServerUrl();
       const title = document.getElementById('title').value;
       const content = document.getElementById('content').value;
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
 
-      fetch('http://127.0.0.1:8000/board-create/', { // 실제 API URL에 맞게 수정
+      fetch(`${serverUrl}/board-create/`, { // 실제 API URL에 맞게 수정
         method: 'POST',
         body: formData
       })
@@ -198,10 +218,11 @@
     // 댓글 생성
     document.getElementById('create-comment-form').addEventListener('submit', function(e) {
       e.preventDefault();
+      const serverUrl = getServerUrl();
       const content = document.getElementById('comment-content').value;
       const formData = new FormData();
       formData.append('content', content);
-      fetch('http://127.0.0.1:8000/comment-create/', {
+      fetch(`${serverUrl}/comment-create/`, {
         method: 'POST',
         body: formData
       })
